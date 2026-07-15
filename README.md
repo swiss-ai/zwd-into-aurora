@@ -5,6 +5,7 @@
 [![Paper](https://img.shields.io/badge/paper-Geophysical%20Research%20Letters-blue)](#citation)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE.txt)
 [![Built on Aurora](https://img.shields.io/badge/built%20on-microsoft%2Faurora-lightgrey)](https://github.com/microsoft/aurora)
+[![Based on ESFM](https://img.shields.io/badge/based%20on-swiss--ai%2FESFM-lightgrey)](https://github.com/swiss-ai/ESFM)
 
 This repository contains the training, inference, and evaluation code accompanying
 our paper on integrating **GNSS-derived Zenith Wet Delay (ZWD)** and
@@ -43,6 +44,7 @@ We extend Aurora with ZWD as a new surface variable and fine-tune it for six-hou
   - [Training](#training)
   - [Inference](#inference)
   - [Pre- and post-processing](#pre--and-post-processing)
+  - [Evaluation](#evaluation)
 - [Model checkpoints](#model-checkpoints)
 - [Citation](#citation)
 - [License and attribution](#license-and-attribution)
@@ -129,7 +131,10 @@ pip install -e '.[dev]'
 
 ## Data
 
-The experiments use three public datasets. Point the entries in [`dataset_config.yaml`](dataset_config.yaml) to your local copies before training.
+The experiments use three public datasets. All paths in [`dataset_config.yaml`](dataset_config.yaml),
+the SLURM launchers under [`scripts/`](scripts/), and the cluster block at the top of
+[`train_fsdp.py`](train_fsdp.py) are **placeholders of the form `/path/to/...`** — replace them with
+your local data and checkpoint locations before running.
 
 | Dataset | Role | Source |
 | ------- | ---- | ------ |
@@ -197,6 +202,18 @@ This runs `inference_direct.py`, which loads a "With ZWD" checkpoint and, option
   [`utils/metrics.py`](utils/metrics.py) and used from `inference_direct.py`.
 - ZWD integration checks and Zarr validation live in
   [`scripts/postprocess/`](scripts/postprocess/).
+
+### Evaluation
+
+Evaluation of the saved predictions is performed with the shared
+**[SwissClim_Evaluations](https://github.com/swiss-ai/SwissClim_Evaluations/tree/v0.2.0)** toolbox
+(v0.2.0) — the same evaluation codebase used across the Swiss AI weather/climate models (including
+[ESFM](https://github.com/swiss-ai/ESFM)), so that scores are directly comparable between models. It
+produces the precipitation skill metrics reported in the paper (RMSE, MSE, FSS, ETS, and energy
+spectra / Log Spectral Distance).
+
+Lightweight, per-variable metric implementations used during inference and for quick checks are also
+available in [`utils/metrics.py`](utils/metrics.py), driven from `inference_direct.py`.
 
 ## Model checkpoints
 
