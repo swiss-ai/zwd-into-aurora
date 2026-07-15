@@ -1,0 +1,100 @@
+[build-system]
+requires = ["hatchling>=1.8.0", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "zwd-into-aurora"
+description = "GNSS Zenith Wet Delay and precipitation integration into the Aurora weather foundation model (derivative of microsoft/aurora via swiss-ai/ESFM; see NOTICE.md)"
+authors = [
+    {name = "Leonardo Trentini"},
+    {name = "Fanny Lehmann"},
+    {name = "Laura Crocetti"},
+    {name = "Benedikt Soja"},
+]
+license = {file = "LICENSE.txt"}
+readme = "README.md"
+keywords = [
+	"aurora model",
+	"zenith wet delay",
+	"gnss",
+	"precipitation forecasting",
+	"deep learning",
+	"foundation models",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 5 - Production/Stable",
+]
+dynamic = ["version"]
+
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "torch",
+    "einops",
+    "timm==0.6.13",
+    "huggingface-hub",
+]
+
+[project.optional-dependencies]
+dev = [
+    "wheel",
+    "build",
+    "pytest",
+    "pytest-cov",
+    "mypy",
+    "ruff==0.4.1",
+    "pre-commit",
+    "scipy",
+]
+
+[project.urls]
+repository = "https://github.com/swiss-ai/zwd-into-aurora"
+
+[tool.hatch.build]
+include = ["aurora*", "LICENSE"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "aurora/_version.py"
+
+[tool.coverage.run]
+branch = true
+command_line = "-m pytest --verbose test"
+source = ["aurora"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/"]
+addopts = [
+    "-ra",
+    "-p",
+    "no:doctest",
+]
+minversion = "6.0"
+
+[tool.ruff]
+src = ["aurora"]
+target-version = "py38"
+line-length = 100
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = [
+    "B",  # flake8-bugbear
+    "D410",
+    "E", "W",  # pycodestyle
+    "F",  # Pyflakes
+    "I",  # isort
+    "SIM",  # flake8-simplify
+    "UP",  # pyupgrade
+]
+ignore = ["F811", "B018"]
+
+[tool.ruff.lint.isort]
+known-local-folder = ["aurora"]
+
+[tool.ruff.format]
+docstring-code-format = true

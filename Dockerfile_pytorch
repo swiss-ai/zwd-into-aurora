@@ -1,0 +1,62 @@
+FROM nvcr.io/nvidia/pytorch:24.05-py3
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ="Europe/Zurich"
+
+# Install necessary packages
+RUN apt-get update && apt-get install -y git curl wget libeccodes0 libopenmpi3 libopenjp2-7 ncdu htop screen zip unzip
+
+# Copied from dockerfile of climax
+RUN apt-get update && apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    gpg \
+    curl \
+    vim \
+    wget \
+    ca-certificates \
+    libjpeg-dev \
+    libpng-dev \
+    librdmacm1 \
+    libibverbs1 \
+    ibverbs-providers \
+    openssh-client \
+    openssh-server \
+    libsm6 \
+    libxext6 \
+    ffmpeg \
+    libfontconfig1 \
+    libxrender1 \
+    libgl1-mesa-glx &&\
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
+
+RUN python -m pip install --upgrade pip
+
+# Install Python dependencies for graphcast
+RUN pip install dask matplotlib numpy \
+    pandas typing_extensions ipython ipykernel \
+    jupyterlab notebook ipywidgets cfgrib nvtx \
+    wandb hanging_threads glymur diffusers[torch] lightning xarray timm==0.6.13 \
+    memory_profiler DeepSpeed h5py netCDF4 
+
+RUN pip install --extra-index-url https://pypi.nvidia.com --upgrade nvidia-dali-cuda120 
+#torchdata==0.8.0 #not available for arm64
+# RUN pip install --extra-index-url https://pypi.nvidia.com --upgrade nvidia-dali-cuda120
+
+RUN pip install flash-attn --no-build-isolation
+
+
+# Configure glymur
+RUN mkdir -p /root/.config/glymur && printf "[library]\nopenjp2: /usr/lib/aarch64-linux-gnu/libopenjp2.so.7" > /root/.config/glymur/glymurrc
+ENV XDG_CONFIG_HOME="/root/.config"
+
+# Set up workspace
+RUN mkdir -p /workspace
+WORKDIR /workspace
+
+# Set LD_LIBRARY_PATH for CUDA and HPC-X
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:/opt/hpcx/ucc/lib/:/opt/hpcx/ucx/lib:$LD_LIBRARY_PATH
+
+CMD [ "/bin/bash" ]

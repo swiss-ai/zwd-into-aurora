@@ -1,0 +1,22 @@
+name: base
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python==3.11.*
+  - pip
+  - pip:
+    - torch
+    - torchvision
+    - dask
+    - netCDF4
+    - microsoft-aurora
+    - matplotlib
+    - numpy
+    - pandas
+    - ipykernel
+    - xarray
+    - memory_profiler
+    - zarr
+    - natsort
+    - mmnpz

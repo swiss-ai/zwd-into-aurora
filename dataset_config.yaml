@@ -1,0 +1,95 @@
+# Data-source definitions for the ZWD + precipitation experiments.
+#
+# All paths below are placeholders: replace the "/path/to/data" prefix with the
+# location of your local data store (or point each entry at the corresponding
+# Zarr store directly). The three sources correspond to the paper's experiments:
+#   - era5_zwd                      : Step 1, learn ZWD as a new surface variable
+#   - era5_zwd_precip               : Model A, precipitation WITH ZWD
+#   - era5_zwd_precip_without_zwd   : Model B, precipitation baseline WITHOUT ZWD
+#
+# `path_slt` (ERA5 soil-type static field) can be produced with scripts/export_era5_slt.py.
+
+era5_zwd:
+    class: WeatherBench2Raw
+    surf_vars: [2t, 10u, 10v, msl, zwd]
+    atmos_vars: [z, u, v, t, q]
+    static_vars: [lsm, z, slt]
+    path_slt:
+    batch_size: 1
+    start_time_train: '2010-01-01T00:00:00'
+    end_time_train: '2019-06-30T23:00:00'
+    step_time_train: 1
+    start_time_val: '2019-07-09T00:00:00'
+    end_time_val: '2020-07-20T00:00:00'
+    step_time_val: 1
+    conf:
+        path: '/path/to/data/weatherbench2_original'
+        str_task: 6h-forecast
+        atmos_levels: [50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
+        surf_vars: [2t, 10u, 10v, msl, zwd]
+        atmos_vars: [z, u, v, t, q]
+        static_vars: [lsm, z, slt]
+        is_global_observation: true
+        resolution: [721, 1440]
+        grid_resolution: 0.25
+        extended_vars: [zwd]
+        extended_path: {
+            'zwd' : '/path/to/data/ZWDX/era5/zwd_data_1h_lead_time.zarr',
+        }
+
+era5_zwd_precip:
+    class: WeatherBench2Raw
+    surf_vars: [2t, 10u, 10v, msl, zwd, tp_mswep]
+    atmos_vars: [z, u, v, t, q]
+    static_vars: [lsm, z, slt]
+    path_slt:
+    batch_size: 1
+    start_time_train: '2010-01-01T00:00:00'
+    end_time_train: '2018-12-31T23:00:00'
+    step_time_train: 3
+    start_time_val: '2019-01-01T00:00:00'
+    end_time_val: '2020-03-31T23:00:00'
+    step_time_val: 3
+    conf:
+        path: '/path/to/data/weatherbench2_original'
+        str_task: 6h-forecast
+        atmos_levels: [50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
+        surf_vars: [2t, 10u, 10v, msl, zwd, tp_mswep]
+        atmos_vars: [z, u, v, t, q]
+        static_vars: [lsm, z, slt]
+        is_global_observation: true
+        resolution: [721, 1440]
+        grid_resolution: 0.25
+        extended_vars: [zwd, tp_mswep]
+        extended_path: {
+            'zwd' : '/path/to/data/ZWDX/era5/zwd_data_1h_lead_time.zarr',
+            'tp_mswep' : '/path/to/data/MSWEP-v280-720x1440-6h_acc_3h_sampling.zarr',
+        }
+
+era5_zwd_precip_without_zwd:
+    class: WeatherBench2Raw
+    surf_vars: [2t, 10u, 10v, msl, tp_mswep]
+    atmos_vars: [z, u, v, t, q]
+    static_vars: [lsm, z, slt]
+    path_slt:
+    batch_size: 1
+    start_time_train: '2010-01-01T00:00:00'
+    end_time_train: '2018-12-31T23:00:00'
+    step_time_train: 3
+    start_time_val: '2019-01-01T00:00:00'
+    end_time_val: '2020-03-31T23:00:00'
+    step_time_val: 3
+    conf:
+        path: '/path/to/data/weatherbench2_original'
+        str_task: 6h-forecast
+        atmos_levels: [50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
+        surf_vars: [2t, 10u, 10v, msl, tp_mswep]
+        atmos_vars: [z, u, v, t, q]
+        static_vars: [lsm, z, slt]
+        is_global_observation: true
+        resolution: [721, 1440]
+        grid_resolution: 0.25
+        extended_vars: [tp_mswep]
+        extended_path: {
+            'tp_mswep' : '/path/to/data/MSWEP-v280-720x1440-6h_acc_3h_sampling.zarr',
+        }

@@ -1,0 +1,22 @@
+#image = "/path/to/containers/time.sqsh"
+#image = "/path/to/containers/aurora_arm64_modulus2404.sqsh"
+#image = "/path/to/containers/aurora_arm64_modulus2404.new.sqsh"
+image = "/path/to/containers/aurora_arm64_modulus2404.new.new.sqsh"
+
+writable = true
+mounts = ["/users", "/capstor", "/iopsstor",
+   ]
+ 
+# [annotations.com.hooks.ssh]
+# enabled = "true"
+# authorize_ssh_key = "/users/$USER/.ssh/cscs-key.pub"
+
+[annotations] 
+com.hooks.aws_ofi_nccl.enabled = "true" 
+com.hooks.aws_ofi_nccl.variant = "cuda12"
+
+[env]
+FI_CXI_DISABLE_HOST_REGISTER = "1"
+FI_MR_CACHE_MONITOR = "userfaultfd"
+
+
