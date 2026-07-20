@@ -22,7 +22,10 @@ from aurora.model.fourier import lead_time_expansion
 from aurora.model.lora import LoRAMode, LoRARollout
 from aurora.model.util import init_weights, maybe_adjust_windows
 
-from flash_attn import flash_attn_qkvpacked_func
+try:
+    from flash_attn import flash_attn_qkvpacked_func
+except ImportError:  # flash-attn is optional (CUDA-only); fall back to standard attention
+    flash_attn_qkvpacked_func = None
 
 __all__ = ["Swin3DTransformerBackbone"]
 
@@ -180,7 +183,7 @@ class WindowAttention(nn.Module):
             qkv = torch.stack([q_ln, k_ln, v], dim=0)
 
         attn_dropout = self.attn_drop if self.training else 0.0
-        use_flash_attn = True
+        use_flash_attn = flash_attn_qkvpacked_func is not None
         if self.disable_flashattention:
             use_flash_attn = False
         if mask is not None:

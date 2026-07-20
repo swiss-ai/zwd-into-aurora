@@ -26,7 +26,10 @@ from aurora.model.util import (
     init_weights,
 )
 
-from flash_attn import flash_attn_qkvpacked_func
+try:
+    from flash_attn import flash_attn_qkvpacked_func
+except ImportError:  # flash-attn is optional (CUDA-only); fall back to standard attention
+    flash_attn_qkvpacked_func = None
 
 __all__ = ["Perceiver3DEncoder"]
 
@@ -370,7 +373,7 @@ class AxialAttention(nn.Module):
         k = k.view(b, l, self.num_heads, self.head_dim)
         v = v.view(b, l, self.num_heads, self.head_dim)
 
-        use_flash_attn = q.dtype in [torch.float16, torch.bfloat16]
+        use_flash_attn = flash_attn_qkvpacked_func is not None and q.dtype in [torch.float16, torch.bfloat16]
         if self.disable_flashattention:
             use_flash_attn = False
         if use_flash_attn:

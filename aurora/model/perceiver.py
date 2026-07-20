@@ -61,7 +61,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 from einops import rearrange
 
-from flash_attn import flash_attn_func
+try:
+    from flash_attn import flash_attn_func
+except ImportError:  # flash-attn is optional (CUDA-only); fall back to standard attention
+    flash_attn_func = None
 
 __all__ = ["MLP", "PerceiverResampler"]
 
@@ -153,7 +156,7 @@ class PerceiverAttention(nn.Module):
         
         attn_dropout = self.attn_drop if self.training else 0.0
         
-        use_flash_attn = latents.dtype in [torch.float16, torch.bfloat16]
+        use_flash_attn = flash_attn_func is not None and latents.dtype in [torch.float16, torch.bfloat16]
         if self.disable_flashattention:
             use_flash_attn = False
         if use_flash_attn:
