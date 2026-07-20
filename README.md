@@ -2,7 +2,7 @@
 
 **Integrating GNSS-Derived Zenith Wet Delay into a Weather Foundation Model Improves Precipitation Forecasting**
 
-[![Paper](https://img.shields.io/badge/paper-Geophysical%20Research%20Letters-blue)](#citation)
+[![Paper](https://img.shields.io/badge/paper-under%20review-blue)](#citation)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE.txt)
 [![Built on Aurora](https://img.shields.io/badge/built%20on-microsoft%2Faurora-lightgrey)](https://github.com/microsoft/aurora)
 [![Based on ESFM](https://img.shields.io/badge/based%20on-swiss--ai%2FESFM-lightgrey)](https://github.com/swiss-ai/ESFM)
@@ -14,7 +14,7 @@ a state-of-the-art weather foundation model.
 
 > **Authors:** Leonardo Trentini, Fanny Lehmann, Laura Crocetti, Benedikt Soja
 > · ETH Zurich
-> **Paper:** _Geophysical Research Letters_ (under review) — see [Citation](#citation).
+> **Paper:** under review — see [Citation](#citation).
 
 <p align="center">
   <img src="assets/experiment_design.png" alt="Experimental design" width="720"/>
