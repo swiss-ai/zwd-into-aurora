@@ -5,7 +5,7 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 
-dataset_path = "/path/to/data/ZWDX/era5/"
+dataset_path = os.path.join(os.environ.get("DATA_ROOT", "/path/to/data"), "ZWDX", "era5")
 zwd_path = Path(dataset_path)
 
 output_zarr_path = os.path.join(dataset_path, "zwd_data_1h_lead_time.zarr")

@@ -15,13 +15,16 @@ Usage:
 """
 
 import gc
+import os
 import numpy as np
 import pandas as pd
 import xarray as xr
 import zarr
 
-INPUT_PATH = "/path/to/data/MSWEP-v280-720x1440-3h_new.zarr"
-OUTPUT_PATH = "/path/to/data/MSWEP-v280-720x1440-6h_acc_3h_sampling.zarr"
+DATA_ROOT = os.environ.get("DATA_ROOT", "/path/to/data")
+
+INPUT_PATH = f"{DATA_ROOT}/MSWEP-v280-720x1440-3h_new.zarr"
+OUTPUT_PATH = f"{DATA_ROOT}/MSWEP-v280-720x1440-6h_acc_3h_sampling.zarr"
 VAR_NAME = "total_precipitation_MSWEP"
 
 print(f"Opening {INPUT_PATH} ...", flush=True)

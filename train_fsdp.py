@@ -35,6 +35,9 @@ from aurora.model.decoder import Perceiver3DDecoder
 import yaml
 from config import parse_args
 from utils import dataset, logging_utils, losses, model_freezer
+
+# Root of the local data store; override by exporting DATA_ROOT (see README / dataset_config.yaml).
+DATA_ROOT = os.environ.setdefault("DATA_ROOT", "/path/to/data")
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
 from torch.optim.lr_scheduler import LinearLR, CosineAnnealingLR, SequentialLR, ConstantLR
 from torchdata.stateful_dataloader import StatefulDataLoader
@@ -95,36 +98,36 @@ if is_switch:
 
     # List of datetime objects with 1-hour steps
     time_steps = [np.datetime64(start_time + timedelta(hours=i)) for i in range(int((end_time - start_time).total_seconds() // 3600) + 1)]
-    path_weatherbench2 = '/path/to/data/weatherbench2_subset.zarr'
+    path_weatherbench2 = f'{DATA_ROOT}/weatherbench2_subset.zarr'
     inds_train = time_steps
     inds_val = inds_train
 
 if is_bristen:
-    DATA_PATH_PREFIX = '/path/to/data/'
+    DATA_PATH_PREFIX = DATA_ROOT
     # start_time_train = datetime(1979, 1, 1, 0, 0, 0)
     start_time_train = datetime(2020, 12, 21, 0, 0, 0) ## making it 10 days for testing it now
     end_time_train = datetime(2020, 12, 31, 23, 0, 0)
     start_time_val = datetime(2021, 1, 1, 0, 0, 0)
     # end_time_val = datetime(2021, 12, 31, 23, 0, 0) ## last date on wb2 is 2021-12-31
     end_time_val = datetime(2021, 1, 2, 23, 0, 0)
-    path_weatherbench2 = '/path/to/data/weatherbench2_original'
+    path_weatherbench2 = f'{DATA_ROOT}/weatherbench2_original'
     path_cmip6 = '' # TODO: add path in briston
-    path_slt = '/path/to/data/ERA5_Soiltype.npy'
+    path_slt = f'{DATA_ROOT}/ERA5_Soiltype.npy'
     slt = np.load(path_slt)
     inds_train = [np.datetime64(start_time_train + timedelta(hours=i)) for i in range(int((end_time_train - start_time_train).total_seconds() // 3600) + 1)]
     inds_val = [np.datetime64(start_time_val + timedelta(hours=i)) for i in range(int((end_time_val - start_time_val).total_seconds() // 3600) + 1)]
 
 if is_clariden:
-    DATA_PATH_PREFIX = '/path/to/data/'
+    DATA_PATH_PREFIX = DATA_ROOT
     start_time_train = datetime(1979, 1, 1, 0, 0, 0)
     #start_time_train = datetime(2020, 11, 1, 0, 0, 0) ## making it 2 months for testing it now
     end_time_train = datetime(2020, 12, 31, 23, 0, 0)
     start_time_val = datetime(2021, 1, 1, 0, 0, 0)
     end_time_val = datetime(2021, 12, 31, 23, 0, 0) ## last date on wb2 is 2021-12-31
     #end_time_val = datetime(2021, 1, 2, 23, 0, 0)
-    path_weatherbench2 = '/path/to/data/weatherbench2_original'
+    path_weatherbench2 = f'{DATA_ROOT}/weatherbench2_original'
     path_cmip6 = ''
-    path_slt = '/path/to/data/ERA5_Soiltype.npy'
+    path_slt = f'{DATA_ROOT}/ERA5_Soiltype.npy'
     slt = np.load(path_slt)
     inds_train = [np.datetime64(start_time_train + timedelta(hours=i)) for i in range(int((end_time_train - start_time_train).total_seconds() // 3600) + 1)]
     inds_val = [np.datetime64(start_time_val + timedelta(hours=i)) for i in range(int((end_time_val - start_time_val).total_seconds() // 3600) + 1)]
@@ -230,7 +233,7 @@ def load_data(yaml_path, datasets_type):
             yml_file = yaml.safe_load(file)
             data_cls = getattr(dataset, yml_file[dataset_type]['class'])
             conf_train = yml_file[dataset_type]['conf']
-            conf_train['path'] = os.path.join(DATA_PATH_PREFIX, conf_train['path'])
+            conf_train['path'] = dataset.resolve_data_path(conf_train['path'])
             
             if dataset_type in ['era5', 'era5_climate', 'era5_spatial_unmask', 'era5_vertical_unmask', 'era5_variable_unmask']:
                 conf_train['inds'] = inds_train

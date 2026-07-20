@@ -13,8 +13,11 @@
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate zarr_env
 
+export DATA_ROOT="${DATA_ROOT:-/path/to/data}"
+WORK_DIR="${WORK_DIR:-/path/to/checkpoints}"
+
 python compare_zwd_integration.py \
-    --target /path/to/checkpoints/zwd/lr_1e-4_lw_scheduler/target_2020-07-25_600steps.zarr \
+    --target ${WORK_DIR}/zwd/lr_1e-4_lw_scheduler/target_2020-07-25_600steps.zarr \
     --external zwd_20200801.zarr \
     --static static_vars.nc \
     --date 2020-08-01 \

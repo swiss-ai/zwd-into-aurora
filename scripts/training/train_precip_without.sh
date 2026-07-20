@@ -25,6 +25,8 @@ export WANDB_ARTIFACT_LOCATION="/iopsstor/scratch/cscs/$USER/wandb/artifact_loca
 export WANDB_ARTIFACT_DIR="/iopsstor/scratch/cscs/$USER/wandb/artifact_dir"
 export WANDB_CONFIG_DIR="/iopsstor/scratch/cscs/$USER/wandb/config"
 export WANDB_DATA_DIR="/iopsstor/scratch/cscs/$USER/wandb/data_dir"
+export DATA_ROOT="${DATA_ROOT:-/path/to/data}"
+WORK_DIR="${WORK_DIR:-/path/to/checkpoints}"
 export OMP_NUM_THREADS=1
 ulimit -c 0  # disable core dumps
 ulimit -t unlimited
@@ -89,7 +91,7 @@ srun --ntasks=$nnodes \
         --epochs 8 \
         --devices 4 \
         --num_nodes $SLURM_JOB_NUM_NODES \
-        --log_dir "/path/to/checkpoints/precip_new/without_zwd_new/" \
+        --log_dir "${WORK_DIR}/precip_new/without_zwd_new/" \
         --wnb_project "ESFM_zwd_precip" \
         --wnb_name "$SLURM_JOB_NUM_NODES/without_zwd" \
         --wnb_id $CURRENT_TIME \

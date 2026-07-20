@@ -26,6 +26,8 @@ export WANDB_ARTIFACT_LOCATION="/iopsstor/scratch/cscs/$USER/wandb/artifact_loca
 export WANDB_ARTIFACT_DIR="/iopsstor/scratch/cscs/$USER/wandb/artifact_dir"
 export WANDB_CONFIG_DIR="/iopsstor/scratch/cscs/$USER/wandb/config"
 export WANDB_DATA_DIR="/iopsstor/scratch/cscs/$USER/wandb/data_dir"
+export DATA_ROOT="${DATA_ROOT:-/path/to/data}"
+WORK_DIR="${WORK_DIR:-/path/to/checkpoints}"
 export OMP_NUM_THREADS=1
 ulimit -c 0  # disable core dumps
 ulimit -t unlimited
@@ -80,7 +82,7 @@ srun --ntasks=$nnodes \
         --epochs 10 \
         --devices 1 \
         --num_nodes $SLURM_JOB_NUM_NODES \
-        --log_dir "/path/to/checkpoints/precip_new/lw_2/" \
+        --log_dir "${WORK_DIR}/precip_new/lw_2/" \
         --name_ckpt "model_ckpt-step=7400-loss_train=0.07.ckpt" \
         --dataset_config_path "dataset_config.yaml" \
         --data_sources "era5_zwd_precip" \
@@ -89,7 +91,7 @@ srun --ntasks=$nnodes \
         --lead_time_h 6 \
         --output_prefix "rollout" \
         --save_baseline \
-        --baseline_ckpt "/path/to/checkpoints/precip_new/without_zwd/model_ckpt-epoch=3-loss_train=0.07.ckpt" \
+        --baseline_ckpt "${WORK_DIR}/precip_new/without_zwd/model_ckpt-epoch=3-loss_train=0.07.ckpt" \
         --baseline_data_sources "era5_zwd_precip_without_zwd" \
         --start_time_test \
             "2020-04-20T00:00:00" \

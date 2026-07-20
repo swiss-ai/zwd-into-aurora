@@ -12,7 +12,7 @@ import os
 # -----------------------
 # CONFIGURATION
 # -----------------------
-workspace = "/path/to/outputs/"
+workspace = os.environ.get("OUTPUT_DIR", "/path/to/outputs")
 ground_truth_path = os.path.join(workspace, "target_2020-10-10_5steps.zarr")
 prediction_path = os.path.join(workspace, "pred_2020-10-10_5steps.zarr")
 time_index = 0  # Change this to select a different timestep

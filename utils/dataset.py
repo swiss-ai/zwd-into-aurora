@@ -23,7 +23,18 @@ from aurora.normalisation import load_normalization_stats
 from utils.transform_data import transform_data, accumulate_data
 
 
-d_srf_abr2full = {"2t": "2m_temperature", 
+# Root of the local data store. Paths in dataset_config.yaml use the ${DATA_ROOT}
+# placeholder; set the DATA_ROOT environment variable to point at your data (it
+# falls back to "/path/to/data" if unset).
+os.environ.setdefault("DATA_ROOT", "/path/to/data")
+
+
+def resolve_data_path(path):
+    """Expand ${DATA_ROOT} (and other environment variables) in a data path string."""
+    return os.path.expandvars(path) if isinstance(path, str) else path
+
+
+d_srf_abr2full = {"2t": "2m_temperature",
                   "10u": "10m_u_component_of_wind", 
                   "10v": "10m_v_component_of_wind", 
                   "msl": "mean_sea_level_pressure", 
@@ -60,14 +71,14 @@ d_atmos_full2abr = {v: k for k, v in d_atmos_abr2full.items()}
 class ScalarCO2Mapper:
     def __init__(
             self,
-            co2_path: str = '/path/to/data/global_annual_CO2.csv',
+            co2_path: str = '${DATA_ROOT}/global_annual_CO2.csv',
             co2_fullname: str='global_CO2',
             lead_time_h: int=6,
             inds = None,
             ):
         self.co2_fullname = co2_fullname
 
-        co2_df = pd.read_csv(co2_path)
+        co2_df = pd.read_csv(resolve_data_path(co2_path))
         co2_df.columns = ["year", "CO2"]
         time_base = np.array([np.datetime64(f'{year}-07-02T00:00:00.000000000') for year in co2_df["year"]]) # 2nd of July is the middle of the year
         # add timesteps at the ends of range (the need for this depends on the inds definition)
@@ -105,7 +116,7 @@ class WeatherBench2Raw(Dataset):
     def __init__(
         self, 
         name='era5',
-        path: str = '/path/to/data/weatherbench2_original', 
+        path: str = '${DATA_ROOT}/weatherbench2_original',
         extended_path: dict = None, # key=variable full name, value=path to dataset that contains this extra variable
         extended_vars: list = None, # list of the variables (full name) from extended_dataset to include in original dataset
         stats_path: str = 'aurora/normalization_stats_1979_2021.json',
@@ -117,7 +128,7 @@ class WeatherBench2Raw(Dataset):
         atmos_vars: list[str] = None,
         atmos_levels = np.asarray([50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000], dtype=np.int32),
         dict_stats: Optional[dict[str, tuple[float, float]]] = None, 
-        co2_path: str = '/path/to/data/global_annual_CO2.csv',
+        co2_path: str = '${DATA_ROOT}/global_annual_CO2.csv',
         is_global_observation: bool = True,
         grid_resolution: float = 0.25,
         lead_time_h: int = 6, # lead time in hours for the forecast task
@@ -125,6 +136,9 @@ class WeatherBench2Raw(Dataset):
     ):
         '''Defining surf_vars, static_vars, atmos_vars will overwrite dict_vars. 
         variable_name_mapping is ignored since all other datasets must conform to ERA5 convention.'''
+        path = resolve_data_path(path)
+        if extended_path is not None:
+            extended_path = {k: resolve_data_path(v) for k, v in extended_path.items()}
         self.name = name
         self.path = path
         self.inds = inds

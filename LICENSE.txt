@@ -1,6 +1,10 @@
 MIT License
 
-Implementation of the Aurora model.
+Implementation of the Aurora model, additional modifications for its extension to the ESFM model, and further modifications integrating GNSS-derived Zenith Wet Delay and precipitation forecasting.
+
+Copyright (c) 2026 Leonardo Trentini.
+
+Copyright (c) 2026 ETH Zurich.
 
 Copyright (c) Microsoft Corporation.
 

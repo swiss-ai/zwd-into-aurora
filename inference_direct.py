@@ -23,6 +23,9 @@ import postprocessing_esfm
 from aurora.normalisation import load_normalization_stats
 from huggingface_hub import hf_hub_download
 
+# Root of the local data store; override by exporting DATA_ROOT (see README / dataset_config.yaml).
+DATA_ROOT = os.environ.setdefault("DATA_ROOT", "/path/to/data")
+
 parser = get_parser()
 parser.add_argument("--use_lora", action=argparse.BooleanOptionalAction, default=False, help="Enable or disable LoRA ")
 parser.add_argument("--lora_steps", type=int, default=16, help="Number of LoRA adaptation steps")
@@ -92,10 +95,10 @@ else:
 
 atmos_levels = np.asarray([50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000], dtype=np.int32)
 
-tmp1a = xr.open_zarr("/path/to/data/weatherbench2_original", chunks=None)
-tmp1b = xr.open_zarr("/path/to/data/weatherbench2_2022_2023.zarr", chunks=None)
-tmp2 = xr.open_zarr("/path/to/data/weatherbench2_additionalvariables.zarr", chunks=None, drop_variables=['divergence', 'volumetric_soil_water_layer_4', 'potential_vorticity', 'vorticity'])
-# tmp_zwd = xr.open_zarr("/path/to/data/ZWDX/era5/zwd_data.zarr", chunks=None)
+tmp1a = xr.open_zarr(f"{DATA_ROOT}/weatherbench2_original", chunks=None)
+tmp1b = xr.open_zarr(f"{DATA_ROOT}/weatherbench2_2022_2023.zarr", chunks=None)
+tmp2 = xr.open_zarr(f"{DATA_ROOT}/weatherbench2_additionalvariables.zarr", chunks=None, drop_variables=['divergence', 'volumetric_soil_water_layer_4', 'potential_vorticity', 'vorticity'])
+# tmp_zwd = xr.open_zarr(f"{DATA_ROOT}/ZWDX/era5/zwd_data.zarr", chunks=None)
 ds = xr.merge([tmp1a, tmp2.sel(time=tmp1a.time)])
 ds_2022 = xr.merge([tmp1b, tmp2.sel(time=tmp1b.time)])
 # ds = xr.merge([tmp1a.sel(time=tmp_zwd.time), tmp_zwd], compat='override', join='override')
@@ -107,7 +110,7 @@ ds = ds.sel(latitude=ds.latitude.values[:-1])
 if 'extended_path' in yml_file[data_source]['conf']:
     dict_ds_extended = dict()
     for k in yml_file[data_source]['conf']['extended_vars']:
-        tmp = xr.open_zarr(yml_file[data_source]['conf']['extended_path'][k], chunks=None)[dataset.d_srf_abr2full[k]].sel(latitude=ds.latitude, longitude=ds.longitude)
+        tmp = xr.open_zarr(dataset.resolve_data_path(yml_file[data_source]['conf']['extended_path'][k]), chunks=None)[dataset.d_srf_abr2full[k]].sel(latitude=ds.latitude, longitude=ds.longitude)
         # if k == 'tp_mswep':
         #     time = np.array(tmp.time)
         #     time[95678] = time[95678] + np.timedelta64(3, 'h')
@@ -120,7 +123,7 @@ if args.save_baseline:
     if 'extended_path' in yml_file[baseline_data_source]['conf']:
         dict_ds_extended_baseline = dict()
         for k in yml_file[baseline_data_source]['conf']['extended_vars']:
-            tmp = xr.open_zarr(yml_file[baseline_data_source]['conf']['extended_path'][k], chunks=None)[dataset.d_srf_abr2full[k]].sel(latitude=ds.latitude, longitude=ds.longitude)
+            tmp = xr.open_zarr(dataset.resolve_data_path(yml_file[baseline_data_source]['conf']['extended_path'][k]), chunks=None)[dataset.d_srf_abr2full[k]].sel(latitude=ds.latitude, longitude=ds.longitude)
             dict_ds_extended_baseline[dataset.d_srf_abr2full[k]] = tmp
     else:
         dict_ds_extended_baseline = None

@@ -46,6 +46,7 @@ We extend Aurora with ZWD as a new surface variable and fine-tune it for six-hou
   - [Pre- and post-processing](#pre--and-post-processing)
   - [Evaluation](#evaluation)
 - [Model checkpoints](#model-checkpoints)
+- [Troubleshooting](#troubleshooting)
 - [Citation](#citation)
 - [License and attribution](#license-and-attribution)
 - [Acknowledgements](#acknowledgements)
@@ -131,10 +132,18 @@ pip install -e '.[dev]'
 
 ## Data
 
-The experiments use three public datasets. All paths in [`dataset_config.yaml`](dataset_config.yaml),
-the SLURM launchers under [`scripts/`](scripts/), and the cluster block at the top of
-[`train_fsdp.py`](train_fsdp.py) are **placeholders of the form `/path/to/...`** — replace them with
-your local data and checkpoint locations before running.
+The experiments use three public datasets. Data paths in
+[`dataset_config.yaml`](dataset_config.yaml) use the `${DATA_ROOT}` placeholder, which is expanded at
+runtime — so instead of editing files, just export **`DATA_ROOT`** (it falls back to `/path/to/data`
+if unset). The SLURM launchers under [`scripts/`](scripts/) additionally honour **`WORK_DIR`** for
+output / checkpoint directories:
+
+```bash
+export DATA_ROOT=/my/data/root        # your Zarr stores (ERA5, ZWDX, MSWEP) live here
+export WORK_DIR=/my/checkpoints       # (SLURM scripts) where checkpoints are written
+```
+
+Both `train_fsdp.py` and `inference_direct.py` read `DATA_ROOT`.
 
 | Dataset | Role | Source |
 | ------- | ---- | ------ |
@@ -218,6 +227,20 @@ available in [`utils/metrics.py`](utils/metrics.py), driven from `inference_dire
 ## Model checkpoints
 
 Trained checkpoints for the "With ZWD" and baseline models will be released alongside the paper. 
+
+## Troubleshooting
+
+- **Weights & Biases logging.** Set `WANDB_KEY` (or `WANDB_API_KEY`) in your environment. If it is
+  unset, training falls back to `--wnb_mode disabled` and simply skips logging.
+- **Data paths.** Export `DATA_ROOT` (and `WORK_DIR` for the SLURM launchers) rather than editing
+  files; the `${DATA_ROOT}` placeholders in [`dataset_config.yaml`](dataset_config.yaml) are expanded
+  at runtime and default to `/path/to/...` if unset. See [Data](#data).
+- **Running outside CSCS Alps.** The `scripts/` launchers are SLURM job files tuned for CSCS: adapt
+  or remove `--account=YOUR_SLURM_ACCOUNT`, `--partition`, the container `.toml`, and the node / GPU
+  counts for your own scheduler.
+- **Distributed training.** Multi-node runs use PyTorch FSDP via `torchrun`; make sure your CUDA /
+  NCCL / PyTorch versions are compatible and that the rendezvous settings (`MASTER_ADDR`,
+  `MASTER_PORT`) in the scripts are valid for your network.
 
 ## Citation
 
