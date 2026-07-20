@@ -68,12 +68,15 @@ source = ["aurora"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/"]
+# Put the repo root on sys.path so tests can import the top-level `utils` namespace
+# package (which is not part of the installed `aurora` distribution).
+pythonpath = ["."]
 addopts = [
     "-ra",
     "-p",
     "no:doctest",
 ]
-minversion = "6.0"
+minversion = "7.0"
 
 [tool.ruff]
 src = ["aurora"]
